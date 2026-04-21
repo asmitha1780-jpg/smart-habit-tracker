@@ -8,5 +8,6 @@ public interface HabitService {
 
     HabitResponse createHabit(String name, String description, Long userId);
     List<HabitResponse> getHabitsByUser(Long userId);
+    void checkInHabit(Long habitId);
     
 }

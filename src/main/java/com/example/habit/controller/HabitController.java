@@ -31,4 +31,11 @@ public class HabitController {
     public List<HabitResponse> getHabitsByUser(@PathVariable Long userId) {
         return habitService.getHabitsByUser(userId);
     }
+    
+    
+    @PostMapping("/{habitId}/check-in")
+    public void checkInHabit(@PathVariable Long habitId)
+    {
+    	habitService.checkInHabit(habitId);
+    }
 }
