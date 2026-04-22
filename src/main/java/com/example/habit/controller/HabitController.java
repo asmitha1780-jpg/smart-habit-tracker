@@ -2,6 +2,7 @@ package com.example.habit.controller;
 
 import com.example.habit.dto.CreateHabitRequest;
 import com.example.habit.dto.HabitResponse;
+import com.example.habit.dto.HabitSummaryResponse;
 import com.example.habit.service.HabitService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -38,4 +39,12 @@ public class HabitController {
     {
     	habitService.checkInHabit(habitId);
     }
+    
+    
+    @GetMapping("/{habitId}/summary")
+    public HabitSummaryResponse getHabitSummary(@PathVariable Long habitId) 
+    {
+        return habitService.getHabitSummary(habitId);
+    }
+    
 }

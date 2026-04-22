@@ -1,6 +1,7 @@
 package com.example.habit.service;
 
 import com.example.habit.dto.HabitResponse;
+import com.example.habit.dto.HabitSummaryResponse;
 import com.example.habit.entity.HabitEntity;
 import com.example.habit.entity.HabitLogEntity;
 import com.example.habit.entity.UserEntity;
@@ -75,5 +76,55 @@ public class HabitServiceImpl implements HabitService {
         habitLogRepository.save(log);
 
     }
+    
+    
+    @Override
+    public HabitSummaryResponse getHabitSummary(Long habitId) 
+    {
+        var habit = habitRepository.findById(habitId)
+                .orElseThrow(() -> new ResourceNotFoundException("Habit not found"));
 
+        var logs = habitLogRepository.findByHabitIdOrderByDateDesc(habitId);
+
+        int streak = calculateCurrentStreak(logs);
+
+        String level = switch (streak) {
+            case 0, 1 -> "LOW";
+            case 2, 3 -> "MEDIUM";
+            default -> "HIGH";
+        };
+
+        return new HabitSummaryResponse(
+                habit.getId(),
+                streak,
+                level
+        );
+    }
+
+    
+    private int calculateCurrentStreak(List<HabitLogEntity> logs) 
+    {
+        if (logs.isEmpty())
+        {
+            return 0;
+        }
+
+        int streak = 0;
+        LocalDate expectedDate = LocalDate.now();
+
+        for (HabitLogEntity log : logs) {
+            if (log.getDate().equals(expectedDate)) 
+            {
+                streak++;
+                expectedDate = expectedDate.minusDays(1);
+            } 
+            else 
+            {
+                break;
+            }
+        }
+        return streak;
+    }
+    
+    
 }
