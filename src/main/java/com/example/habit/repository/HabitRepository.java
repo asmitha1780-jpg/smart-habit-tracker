@@ -8,5 +8,7 @@ import com.example.habit.entity.HabitEntity;
 
 public interface HabitRepository extends JpaRepository<HabitEntity,Long> {
 	List<HabitEntity> findByUserId(Long userId);
-
+	int countByUserId(Long userId);
+	int countByUserIdAndActiveTrue(Long userId);
+	
 }

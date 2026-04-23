@@ -1,6 +1,7 @@
 package com.example.habit.controller;
 
 import com.example.habit.dto.CreateUserRequest;
+import com.example.habit.dto.UserOverviewResponse;
 import com.example.habit.entity.UserEntity;
 import com.example.habit.service.UserService;
 import jakarta.validation.Valid;
@@ -12,7 +13,8 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService) 
+    {
         this.userService = userService;
     }
 
@@ -21,4 +23,13 @@ public class UserController {
     {
         return userService.createUser(request.name(),request.email());
     }
+    
+    
+    @GetMapping("/{userId}/overview")
+    public UserOverviewResponse getUserOverview(@PathVariable Long userId) 
+    {
+      return userService.getUserOverview(userId);
+    } 
+
+    
 }

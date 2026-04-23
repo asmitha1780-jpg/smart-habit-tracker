@@ -1,7 +1,9 @@
 package com.example.habit.service;
 
+import com.example.habit.dto.FeedbackResponse;
 import com.example.habit.dto.HabitResponse;
 import com.example.habit.dto.HabitSummaryResponse;
+import com.example.habit.dto.WeeklySummaryResponse;
 import com.example.habit.entity.HabitEntity;
 import com.example.habit.entity.HabitLogEntity;
 import com.example.habit.entity.UserEntity;
@@ -20,12 +22,14 @@ public class HabitServiceImpl implements HabitService {
     private final HabitRepository habitRepository;
     private final UserService userService;
     private final HabitLogRepository habitLogRepository;
+    private final InsightMessageService insightMessageService;
 
-    public HabitServiceImpl(HabitRepository habitRepository,UserService userService,HabitLogRepository habitLogRepository) 
+    public HabitServiceImpl(HabitRepository habitRepository,UserService userService,HabitLogRepository habitLogRepository,InsightMessageService insightMessageService) 
     {
         this.habitRepository=habitRepository;
         this.userService=userService;
         this.habitLogRepository=habitLogRepository;
+        this.insightMessageService = insightMessageService;
     }
 
     @Override
@@ -126,5 +130,56 @@ public class HabitServiceImpl implements HabitService {
         return streak;
     }
     
+    
+    @Override
+    public WeeklySummaryResponse getWeeklySummary(Long habitId) 
+    {
+        var habit = habitRepository.findById(habitId)
+                .orElseThrow(() -> new ResourceNotFoundException("Habit not found"));
+
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(6);
+
+        var logs = habitLogRepository.findByHabitIdAndDateBetween(habitId,startDate,endDate);
+
+        int completedDays=logs.size();
+        int totalDays=7;
+
+        double percentage=(completedDays * 100.0)/totalDays;
+
+        return new WeeklySummaryResponse(habit.getId(),completedDays,totalDays,percentage);
+        
+    }
+    
+    @Override
+    public FeedbackResponse getFeedback(Long habitId)
+    {
+       HabitSummaryResponse summary = getHabitSummary(habitId);
+       int streak = summary.currentStreak();
+       String message;
+
+        if (streak == 0) 
+        {
+            message = "Performance has been inconsistent. Try restarting gradually.";
+        } 
+        else if (streak <= 2) 
+        {
+            message = "Good start. Try to stay consistent.";
+        } 
+        else 
+        {
+            message = "Great consistency. Keep going.";
+        }
+
+        
+        WeeklySummaryResponse weekly = getWeeklySummary(habitId);
+        String structuredSummary = "Streak: " + streak +", Weekly completion: " 
+                  + weekly.daysCompleted() + "/" + weekly.totalDays();
+        
+        String aiMessage = insightMessageService.generateMessage(structuredSummary);
+        
+        return new FeedbackResponse(message + " " + aiMessage);
+
+    }
     
 }

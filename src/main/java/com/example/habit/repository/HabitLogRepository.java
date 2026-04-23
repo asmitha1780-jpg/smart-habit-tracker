@@ -12,5 +12,8 @@ public interface HabitLogRepository extends JpaRepository<HabitLogEntity,Long> {
 	boolean existsByHabitIdAndDate(Long habitId,LocalDate date);
 	
 	List<HabitLogEntity> findByHabitIdOrderByDateDesc(Long habitId);
+	
+	List<HabitLogEntity> findByHabitIdAndDateBetween(Long habitId,LocalDate startDate,LocalDate endDate);
+
 
 }
